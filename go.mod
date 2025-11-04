@@ -5,6 +5,7 @@ go 1.25.3
 require (
 	github.com/coredns/caddy v1.1.4-0.20250930002214-15135a999495
 	github.com/coredns/coredns v1.13.1
+	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.68
 	github.com/prometheus/client_golang v1.23.0
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0

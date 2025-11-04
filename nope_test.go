@@ -3,6 +3,8 @@ package nope
 import (
 	"strings"
 	"testing"
+
+	"github.com/miekg/dns"
 )
 
 func TestBlocklist(t *testing.T) {
@@ -54,7 +56,7 @@ func TestBlocklist(t *testing.T) {
 		t.Run(c.query, func(t *testing.T) {
 			sbl := newBlocklist("test", c.list)
 
-			if got := sbl.block(c.query); got != c.want {
+			if got := sbl.block(dns.CanonicalName(c.query)); got != c.want {
 				t.Fatalf("unexpected result: got: %v, want: %v\nblocklist: %q", got, c.want, sbl)
 			}
 		})

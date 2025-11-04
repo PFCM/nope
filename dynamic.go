@@ -32,21 +32,26 @@ type dynamicBlocklist struct {
 
 func newDynamicBlocklist(name, source, path string) (*dynamicBlocklist, func(), error) {
 	// read initial list from disk
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, nil, err
-	}
-	hosts, err := readABPFile(f)
-	if err != nil {
-		return nil, nil, err
-	}
+	// f, err := os.Open(path)
+	// if err != nil {
+	// 	return nil, nil, err
+	// }
+	// hosts, err := readABPFile(f)
+	// if err != nil {
+	// 	return nil, nil, err
+	// }
 	d := &dynamicBlocklist{
 		listName: name,
 		source:   source,
 		path:     path,
 
-		blocklist: newBlocklist(name, hosts),
+		// blocklist: newBlocklist(name, hosts),
 	}
+	// TODO: we probably need a way to bootstrap the very first one?
+	if err := d.update(context.Background()); err != nil {
+		return nil, nil, err
+	}
+
 	// start background loop for updates
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -96,6 +101,9 @@ func (d *dynamicBlocklist) update(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	log.Debugf("fetching %q", req.URL)
+	t0 := time.Now()
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -116,8 +124,8 @@ func (d *dynamicBlocklist) update(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	log.Debugf("fetched %d hosts in %v", len(hosts), time.Since(t0))
 	newList := newBlocklist(d.listName, hosts)
-	fmt.Println(newList.blocked[:10])
 	// Seems good, write it.
 	if err := os.WriteFile(d.path, b.Bytes(), 0777); err != nil {
 		return err
