@@ -5,7 +5,7 @@ on:
     - "main"
 
 jobs:
-  go-build:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
     # Checkout coredns
@@ -23,3 +23,14 @@ jobs:
       run: cp nope/build/plugin.cfg coredns/plugin.cfg
     - name: build coredns
       run: cd coredns && make
+    - name: docker login
+      uses: docker/login-action@28fdb31ff34708d19615a74d67103ddc2ea9725c
+      with:
+        username: ${{ vars.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: docker build and push
+      uses: docker/build-push-action@9e436ba9f2d7bcd1d038c8e55d039d37896ddc5d
+      with:
+        context: coredns
+        tags: pfcm/coredns-nope:${{ github.sha }}
+        push: true
