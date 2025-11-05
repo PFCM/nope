@@ -1,0 +1,25 @@
+name: build
+on:
+  push:
+    branches:
+    - "main"
+
+jobs:
+  go-build:
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout coredns
+    - name: checkout nope
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+      with:
+        path: nope
+    - name: checkout coredns
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+      with:
+        repository: coredns/coredns
+        ref: 5cf4c80ac0dacb271cc5d916b3d152e86a4831e4
+        path: coredns
+    - name: copy plugin.cfg
+      run: cp nope/build/plugin.cfg coredns/plugin.cfg
+    - name: build coredns
+      run: cd coredns && make
