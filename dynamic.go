@@ -62,6 +62,15 @@ func newDynamicBlocklist(name, source, path string) (*dynamicBlocklist, func(), 
 				return
 			case <-time.After(delay):
 			}
+			info, err := os.Stat(path)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			if time.Since(info.ModTime()) < delay {
+				log.Infof("Someone else updated %q, going back to sleep", path)
+				continue
+			}
 			if err := d.update(ctx); err != nil {
 				log.Error(err)
 			}
