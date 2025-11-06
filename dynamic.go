@@ -32,6 +32,7 @@ type dynamicBlocklist struct {
 
 func newDynamicBlocklist(name, source, path string) (*dynamicBlocklist, func(), error) {
 	// read initial list from disk
+	log.Infof("Reading initial list from %q", path)
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, nil, err
