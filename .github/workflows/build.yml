@@ -8,7 +8,6 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-    # Checkout coredns
     - name: checkout nope
       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
       with:
@@ -22,7 +21,7 @@ jobs:
     - name: copy plugin.cfg
       run: cp nope/build/plugin.cfg coredns/plugin.cfg
     - name: use current nope
-      run: cd nope/ && go mod edit -replace=github.com/pfcm/nope=../nope
+      run: cd coredns/ && go mod edit -replace github.com/pfcm/nope=../nope && cat go.mod
     - name: build coredns
       run: cd coredns && make
     - name: docker login
