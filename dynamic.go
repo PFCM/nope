@@ -32,24 +32,20 @@ type dynamicBlocklist struct {
 
 func newDynamicBlocklist(name, source, path string) (*dynamicBlocklist, func(), error) {
 	// read initial list from disk
-	// f, err := os.Open(path)
-	// if err != nil {
-	// 	return nil, nil, err
-	// }
-	// hosts, err := readABPFile(f)
-	// if err != nil {
-	// 	return nil, nil, err
-	// }
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	hosts, err := readABPFile(f)
+	if err != nil {
+		return nil, nil, err
+	}
 	d := &dynamicBlocklist{
 		listName: name,
 		source:   source,
 		path:     path,
 
-		// blocklist: newBlocklist(name, hosts),
-	}
-	// TODO: we probably need a way to bootstrap the very first one?
-	if err := d.update(context.Background()); err != nil {
-		return nil, nil, err
+		blocklist: newBlocklist(name, hosts),
 	}
 
 	// start background loop for updates
