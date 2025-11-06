@@ -21,6 +21,8 @@ jobs:
         path: coredns
     - name: copy plugin.cfg
       run: cp nope/build/plugin.cfg coredns/plugin.cfg
+    - name: use current nope
+      run: cd nope/ && go mod edit -replace=github.com/pfcm/nope=../nope
     - name: build coredns
       run: cd coredns && make
     - name: docker login
