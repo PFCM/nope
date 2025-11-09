@@ -31,22 +31,28 @@ type dynamicBlocklist struct {
 }
 
 func newDynamicBlocklist(name, source, path string) (*dynamicBlocklist, func(), error) {
-	// read initial list from disk
-	log.Infof("Reading initial list from %q", path)
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, nil, err
-	}
-	hosts, err := readABPFile(f)
-	if err != nil {
-		return nil, nil, err
-	}
 	d := &dynamicBlocklist{
 		listName: name,
 		source:   source,
 		path:     path,
-
-		blocklist: newBlocklist(name, hosts),
+	}
+	// read initial list from disk
+	log.Infof("Reading initial list from %q", path)
+	f, err := os.Open(path)
+	if os.IsNotExist(err) {
+		log.Infof("Initial list not found, fetching from %q", source)
+		if err := d.update(context.Background()); err != nil {
+			return nil, nil, err
+		}
+	} else if err != nil {
+		return nil, nil, err
+	} else {
+		// No error, read it.
+		hosts, err := readABPFile(f)
+		if err != nil {
+			return nil, nil, err
+		}
+		d.blocklist = newBlocklist(name, hosts)
 	}
 
 	// start background loop for updates
