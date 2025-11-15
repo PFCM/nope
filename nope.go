@@ -45,7 +45,7 @@ func (n *Nope) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (
 		log.Debugf("%q: blocked by %q", host, list)
 		// Return an NXDOMAIN, pretend it doesn't exist.
 		// TODO: there may be better things to do.
-		requestCount.WithLabelValues(metrics.WithServer(ctx), list, host, "blocked").Inc()
+		requestCount.WithLabelValues(metrics.WithServer(ctx), list, "blocked").Inc()
 		resp := &dns.Msg{}
 		resp.SetRcode(r, dns.RcodeNameError)
 		if err := w.WriteMsg(resp); err != nil {
@@ -55,18 +55,17 @@ func (n *Nope) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (
 	}
 
 	// pass it along.
-	requestCount.WithLabelValues(metrics.WithServer(ctx), "", host, "allowed").Inc()
+	requestCount.WithLabelValues(metrics.WithServer(ctx), "", "allowed").Inc()
 	return plugin.NextOrFailure(n.Name(), n.next, ctx, w, r)
 }
 
 // requestCount exports a prometheus metric that tracks blocked/allowed requests.
-// TODO: adding the host as a label is a bit silly, stop it.
 var requestCount = promauto.NewCounterVec(prometheus.CounterOpts{
 	Namespace: plugin.Namespace,
 	Subsystem: Nope{}.Name(),
 	Name:      "request_count_total",
 	Help:      "counter of requests made",
-}, []string{"server", "blocker", "host", "outcome"})
+}, []string{"server", "blocker", "outcome"})
 
 // Block returns true if a host is blocked, false if the request should proceed.
 func (n *Nope) Block(host string) (bool, string) {
